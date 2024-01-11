@@ -4,6 +4,8 @@ import id.my.hendisantika.springbootelasticsearch.model.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-elasticsearch
@@ -16,4 +18,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
+    List<Post> findByTitleContaining(String title);
 }
