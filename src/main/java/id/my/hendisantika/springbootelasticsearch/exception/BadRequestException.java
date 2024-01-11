@@ -1,6 +1,6 @@
 package id.my.hendisantika.springbootelasticsearch.exception;
 
-import org.hibernate.service.spi.ServiceException;
+import id.my.hendisantika.springbootelasticsearch.exception.base.ServiceException;
 
 /**
  * Created by IntelliJ IDEA.
