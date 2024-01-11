@@ -1,8 +1,10 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
+import id.my.hendisantika.springbootelasticsearch.exception.BadRequestException;
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
 import id.my.hendisantika.springbootelasticsearch.model.es.Author;
 import id.my.hendisantika.springbootelasticsearch.repository.es.AuthorEsRepository;
+import id.my.hendisantika.springbootelasticsearch.util.Translator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,15 @@ public class AuthorEsService {
             return authorEsRepository.save(authorUpdate);
         } else {
             return authorEsRepository.save(authorRequest);
+        }
+    }
+
+    public void deleteById(Long id) {
+        Optional<Author> author = authorEsRepository.findById(id);
+        if (author.isPresent()) {
+            authorEsRepository.deleteById(id);
+        } else {
+            throw new BadRequestException(Translator.toLocale("DELETE_ERROR_PLEASE_CHECK_ID"));
         }
     }
 }
