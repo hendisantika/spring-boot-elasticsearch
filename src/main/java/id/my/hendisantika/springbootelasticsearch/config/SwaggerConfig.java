@@ -2,6 +2,7 @@ package id.my.hendisantika.springbootelasticsearch.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -21,4 +22,11 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     @Value("${spring.mvc.servlet.path}")
     private String baseUrl;
+
+    @Override
+    public void addViewControllers(final ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", baseUrl.concat(REDIRECT_URL));
+        registry.addRedirectViewController("/swagger-ui", baseUrl.concat(REDIRECT_URL));
+        registry.addRedirectViewController("/api", baseUrl.concat(REDIRECT_URL));
+    }
 }
