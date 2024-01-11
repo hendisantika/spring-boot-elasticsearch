@@ -8,6 +8,7 @@ import id.my.hendisantika.springbootelasticsearch.exception.TooManyRequestsExcep
 import id.my.hendisantika.springbootelasticsearch.exception.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -75,5 +76,15 @@ public class BaseControllerAdvice {
     public ErrorResponse handleTooManyRequestsException(Exception ex) {
         return new ErrorResponse(
                 String.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()), ex.getMessage(), TIMESTAMP);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ErrorResponse notSupportedException(HttpRequestMethodNotSupportedException ex) {
+        log.debug(ex.getMessage(), ex.getCause());
+        return new ErrorResponse(
+                String.valueOf(HttpStatus.METHOD_NOT_ALLOWED.value()),
+                "Method Not Allowed. Please verify you request",
+                TIMESTAMP);
     }
 }
