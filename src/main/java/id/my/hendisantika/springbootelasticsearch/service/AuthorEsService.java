@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,5 +38,19 @@ public class AuthorEsService {
                         () ->
                                 new DataNotFoundException(
                                         MessageFormat.format("Author id {0} not found", String.valueOf(id))));
+    }
+
+    public Author createOrUpdate(Author authorRequest) {
+        Optional<Author> existingAuthor = authorEsRepository.findById(authorRequest.getId());
+
+        if (existingAuthor.isPresent()) {
+            Author authorUpdate = existingAuthor.get();
+
+            authorUpdate.setName(authorRequest.getName());
+
+            return authorEsRepository.save(authorUpdate);
+        } else {
+            return authorEsRepository.save(authorRequest);
+        }
     }
 }
