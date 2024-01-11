@@ -1,8 +1,12 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
+import id.my.hendisantika.springbootelasticsearch.model.es.Author;
 import id.my.hendisantika.springbootelasticsearch.repository.es.AuthorEsRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.IterableUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,4 +23,8 @@ import org.springframework.stereotype.Service;
 public class AuthorEsService {
 
     private final AuthorEsRepository authorEsRepository;
+
+    public List<Author> getAllAuthors() {
+        return IterableUtils.toList(authorEsRepository.findAll());
+    }
 }
