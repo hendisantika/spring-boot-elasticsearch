@@ -4,6 +4,7 @@ import id.my.hendisantika.springbootelasticsearch.exception.BadRequestException;
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
 import id.my.hendisantika.springbootelasticsearch.exception.DuplicateException;
 import id.my.hendisantika.springbootelasticsearch.exception.ForbiddenException;
+import id.my.hendisantika.springbootelasticsearch.exception.TooManyRequestsException;
 import id.my.hendisantika.springbootelasticsearch.exception.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -67,5 +68,12 @@ public class BaseControllerAdvice {
     public ErrorResponse handleForbiddenException(Exception ex) {
         return new ErrorResponse(
                 String.valueOf(HttpStatus.FORBIDDEN.value()), ex.getMessage(), TIMESTAMP);
+    }
+
+    @ExceptionHandler({TooManyRequestsException.class})
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ErrorResponse handleTooManyRequestsException(Exception ex) {
+        return new ErrorResponse(
+                String.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()), ex.getMessage(), TIMESTAMP);
     }
 }
