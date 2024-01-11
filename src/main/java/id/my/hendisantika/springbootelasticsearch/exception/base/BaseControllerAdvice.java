@@ -1,6 +1,8 @@
 package id.my.hendisantika.springbootelasticsearch.exception.base;
 
+import id.my.hendisantika.springbootelasticsearch.exception.BadRequestException;
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
+import id.my.hendisantika.springbootelasticsearch.exception.DuplicateException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,5 +44,12 @@ public class BaseControllerAdvice {
         log.debug(ex.getMessage(), ex.getCause());
         return new ErrorResponse(
                 String.valueOf(HttpStatus.NOT_FOUND.value()), ex.getMessage(), TIMESTAMP);
+    }
+
+    @ExceptionHandler({BadRequestException.class, DuplicateException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequestException(Exception ex) {
+        return new ErrorResponse(
+                String.valueOf(HttpStatus.BAD_REQUEST.value()), ex.getMessage(), TIMESTAMP);
     }
 }
