@@ -2,6 +2,9 @@ package id.my.hendisantika.springbootelasticsearch.repository.jpa;
 
 import id.my.hendisantika.springbootelasticsearch.model.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +22,8 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByTitleContaining(String title);
+
+    @Modifying
+    @Query(value = "SELECT * FROM posts WHERE title LIKE %:title%", nativeQuery = true)
+    List<Post> selectPosts(@Param("title") String title);
 }
