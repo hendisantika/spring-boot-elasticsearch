@@ -1,4 +1,4 @@
-package id.my.hendisantika.springbootelasticsearch.mode.entity;
+package id.my.hendisantika.springbootelasticsearch.model.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
