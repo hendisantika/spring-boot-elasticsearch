@@ -87,4 +87,12 @@ public class BaseControllerAdvice {
                 "Method Not Allowed. Please verify you request",
                 TIMESTAMP);
     }
+
+    @ExceptionHandler({Exception.class, ServiceException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleAllExceptions(Exception ex) {
+        log.error(ex.getMessage(), ex.getLocalizedMessage());
+        return new ErrorResponse(
+                String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), ex.getMessage(), TIMESTAMP);
+    }
 }
