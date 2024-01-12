@@ -1,8 +1,10 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
+import id.my.hendisantika.springbootelasticsearch.exception.BadRequestException;
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
 import id.my.hendisantika.springbootelasticsearch.model.entity.Tag;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.TagRepository;
+import id.my.hendisantika.springbootelasticsearch.util.Translator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,15 @@ public class TagService {
             return tagRepository.save(tagUpdate);
         } else {
             return tagRepository.save(tagRequest);
+        }
+    }
+
+    public void deleteById(Long id) {
+        Optional<Tag> tag = tagRepository.findById(id);
+        if (tag.isPresent()) {
+            tagRepository.deleteById(id);
+        } else {
+            throw new BadRequestException(Translator.toLocale("DELETE_ERROR_PLEASE_CHECK_ID"));
         }
     }
 }
