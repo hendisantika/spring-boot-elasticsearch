@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,5 +35,11 @@ public class PostTagController {
     public ResponseEntity<List<Tag>> getAllTagsByPostId(@PathVariable(value = "id") Long id) {
         List<Tag> tagList = service.getAllTagsByPostId(id);
         return new ResponseEntity<>(tagList, HttpStatus.OK);
+    }
+
+    @PostMapping("/v1/posts/{id}/tags")
+    public ResponseEntity<Tag> addTag(@PathVariable("id") Long id, @RequestBody Tag tagRequest) {
+        Tag updated = service.addTag(id, tagRequest);
+        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 }
