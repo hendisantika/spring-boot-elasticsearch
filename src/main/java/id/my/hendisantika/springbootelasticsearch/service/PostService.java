@@ -1,6 +1,8 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
+import id.my.hendisantika.springbootelasticsearch.model.dto.PostDTO;
+import id.my.hendisantika.springbootelasticsearch.model.entity.Author;
 import id.my.hendisantika.springbootelasticsearch.model.entity.Post;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.AuthorRepository;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.PostRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,5 +59,24 @@ public class PostService {
                         () ->
                                 new DataNotFoundException(
                                         MessageFormat.format("Post id {0} not found", String.valueOf(id))));
+    }
+
+    public Post createOrUpdate(PostDTO postRequest) {
+        Optional<Post> existingPost = postRepository.findById(postRequest.getId());
+
+        if (existingPost.isPresent()) {
+            Post postUpdate = existingPost.get();
+
+            postUpdate.setTitle(postRequest.getTitle());
+            postUpdate.setBody(postRequest.getBody());
+            if (postRequest.getAuthorId() != 0) {
+                Optional<Author> author = authorRepository.findById(postRequest.getAuthorId());
+                author.ifPresent(postUpdate::setAuthor);
+            }
+
+            return postRepository.save(postUpdate);
+        } else {
+            return postRepository.save(modelMapper.map(postRequest, Post.class));
+        }
     }
 }
