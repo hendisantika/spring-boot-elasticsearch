@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,4 +34,11 @@ public class AuthorEsController {
         List<Author> list = service.getAllAuthors();
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+
+    @GetMapping("/v1/es/authors/{id}")
+    public ResponseEntity<Author> getAuthorById(@PathVariable("id") Long id) {
+        Author entity = service.getById(id);
+        return new ResponseEntity<>(entity, HttpStatus.OK);
+    }
+
 }
