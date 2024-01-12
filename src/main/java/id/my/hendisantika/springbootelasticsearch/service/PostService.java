@@ -1,5 +1,6 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
+import id.my.hendisantika.springbootelasticsearch.exception.BadRequestException;
 import id.my.hendisantika.springbootelasticsearch.exception.DataNotFoundException;
 import id.my.hendisantika.springbootelasticsearch.model.dto.PostDTO;
 import id.my.hendisantika.springbootelasticsearch.model.entity.Author;
@@ -8,6 +9,7 @@ import id.my.hendisantika.springbootelasticsearch.model.entity.Tag;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.AuthorRepository;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.PostRepository;
 import id.my.hendisantika.springbootelasticsearch.repository.jpa.TagRepository;
+import id.my.hendisantika.springbootelasticsearch.util.Translator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -117,5 +119,15 @@ public class PostService {
                         () ->
                                 new DataNotFoundException(
                                         MessageFormat.format("Post id {0} not found", String.valueOf(postId))));
+    }
+
+    public void deleteTagFromPost(Long postId, Long tagId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isPresent()) {
+            post.get().removeTag(tagId);
+            postRepository.save(post.get());
+        } else {
+            throw new BadRequestException(Translator.toLocale("DELETE_ERROR_PLEASE_CHECK_ID"));
+        }
     }
 }
