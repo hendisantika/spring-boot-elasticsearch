@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,5 +38,19 @@ public class TagService {
                         () ->
                                 new DataNotFoundException(
                                         MessageFormat.format("Tag id {0} not found", String.valueOf(id))));
+    }
+
+    public Tag createOrUpdate(Tag tagRequest) {
+        Optional<Tag> existingTag = tagRepository.findById(tagRequest.getId());
+
+        if (existingTag.isPresent()) {
+            Tag tagUpdate = existingTag.get();
+
+            tagUpdate.setName(tagRequest.getName());
+
+            return tagRepository.save(tagUpdate);
+        } else {
+            return tagRepository.save(tagRequest);
+        }
     }
 }
