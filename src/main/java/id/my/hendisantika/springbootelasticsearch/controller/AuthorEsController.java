@@ -2,6 +2,11 @@ package id.my.hendisantika.springbootelasticsearch.controller;
 
 import id.my.hendisantika.springbootelasticsearch.model.es.Author;
 import id.my.hendisantika.springbootelasticsearch.service.AuthorEsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,29 +33,98 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequiredArgsConstructor
+@Tag(name = "Author ES", description = "Endpoint for managing Author ES")
 public class AuthorEsController {
 
     private final AuthorEsService service;
 
     @GetMapping("/v1/es/authors")
+    @Operation(
+            summary = "Get All Authors Data",
+            description = "Get All Authors Data.",
+            tags = {"Author ES"})
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    description = "Success",
+                    responseCode = "200",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            id.my.hendisantika.springbootelasticsearch.model.entity.Author.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Not found", responseCode = "404",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Internal error", responseCode = "500"
+                    , content = @Content)
+    }
+    )
     public ResponseEntity<List<Author>> getAllAuthors() {
         List<Author> list = service.getAllAuthors();
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @GetMapping("/v1/es/authors/{id}")
+    @Operation(
+            summary = "Delete Author Data By ID",
+            description = "Delete Author Data By ID.",
+            tags = {"Author ES"})
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    description = "Success",
+                    responseCode = "200",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            id.my.hendisantika.springbootelasticsearch.model.entity.Author.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Not found", responseCode = "404",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Internal error", responseCode = "500"
+                    , content = @Content)
+    }
+    )
     public ResponseEntity<Author> getAuthorById(@PathVariable("id") Long id) {
         Author entity = service.getById(id);
         return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @PostMapping("/v1/es/authors")
+    @Operation(
+            summary = "Get All Author Data",
+            description = "Get All Author Data.",
+            tags = {"Author ES"})
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    description = "Success",
+                    responseCode = "200",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            id.my.hendisantika.springbootelasticsearch.model.entity.Author.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Not found", responseCode = "404",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Internal error", responseCode = "500"
+                    , content = @Content)
+    }
+    )
     public ResponseEntity<Author> createOrUpdate(@RequestBody Author author) {
         Author updated = service.createOrUpdate(author);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/v1/es/authors/{id}")
+    @Operation(
+            summary = "Delete Author Data",
+            description = "Delete Author Data.",
+            tags = {"Author ES"})
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    description = "Success",
+                    responseCode = "200",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            id.my.hendisantika.springbootelasticsearch.model.entity.Author.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Not found", responseCode = "404",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(description = "Internal error", responseCode = "500"
+                    , content = @Content)
+    }
+    )
     public void deleteById(@PathVariable("id") Long id) {
         service.deleteById(id);
     }
