@@ -1,5 +1,3 @@
-version: '3.9'
-
 networks:
   frontend:
     name: frontend
@@ -22,7 +20,7 @@ services:
       - storage
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.11}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:8.14.1}
     container_name: apim_elasticsearch
     restart: always
     ports:
@@ -48,7 +46,7 @@ services:
       - storage
 
   gateway:
-    image: graviteeio/apim-gateway:${APIM_VERSION:-3}
+    image: graviteeio/apim-gateway:${APIM_VERSION:3}
     container_name: apim_gateway
     restart: always
     ports:
@@ -67,7 +65,7 @@ services:
       - frontend
 
   management_api:
-    image: hendisantika/apim-management-api:${APIM_VERSION:-3}
+    image: hendisantika/apim-management-api:${APIM_VERSION:3}
     container_name: apim_management_api
     restart: always
     ports:
@@ -88,7 +86,7 @@ services:
       - frontend
 
   management_ui:
-    image: hendisantika/apim-management-ui:${APIM_VERSION:-3}
+    image: hendisantika/apim-management-ui:${APIM_VERSION:3}
     container_name: apim_management_ui
     restart: always
     ports:

@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   mvc:
@@ -17,8 +17,15 @@ spring:
     console:
       enabled: true
   elasticsearch:
+    host: localhost:9200
     uris: http://localhost:9200
     username: elastic
-    password: elastic
+    password: changeme
     repositories:
       enabled: true
+
+springdoc:
+  api-docs.path: /v3/api-doc
+  swagger-ui.path: /swagger-ui
+application-description: '@project.description@'
+application-version: '@project.version@'
