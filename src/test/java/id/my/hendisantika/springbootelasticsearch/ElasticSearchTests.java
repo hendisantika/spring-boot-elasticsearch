@@ -8,6 +8,8 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.cluster.HealthResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
+import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -226,5 +228,49 @@ public class ElasticSearchTests {
         }
 
         return products;
+    }
+
+    @Test
+    public void testQueryBuilders() throws Exception {
+        Product product1 = new Product();
+        product1.setId("book-world-records-2020");
+        product1.setStockAvailable(1);
+        product1.setPrice(100);
+        product1.setDescription("The book of the year!");
+        product1.setName("Guinness book of records 2020");
+
+        Product product2 = new Product();
+        product2.setId("book-world-records-2010");
+        product2.setStockAvailable(200);
+        product2.setPrice(80);
+        product2.setDescription("The book of the year!");
+        product2.setName("Guinness book of records 2010");
+
+        Product product3 = new Product();
+        product3.setId("book-world-records-1890");
+        product3.setStockAvailable(0);
+        product3.setPrice(200);
+        product3.setDescription("The book of the year!");
+        product3.setName("Guinness book of records 1890");
+
+        productService.save(Arrays.asList(product1, product2, product3));
+        client.indices().refresh(b -> b.index(INDEX));
+
+        final SearchResponse<Void> response = client.search(b -> b.index(INDEX).query(q -> q.bool(builder ->
+                builder
+                        .must(m -> m.multiMatch(mmq -> mmq.query("Book")))
+                        .should(s -> s.range(r -> r.field("price").lt(JsonData.of(100))))
+                        .filter(f -> f.range(r -> r.field("stock_available").gt(JsonData.of(0))))
+                        .filter(f -> f.range(r -> r.field("price").gt(JsonData.of(0))))
+        )), Void.class);
+
+        // exact hit count
+        assertThat(response.hits().total().value()).isEqualTo(2);
+        assertThat(response.hits().total().relation()).isEqualTo(TotalHitsRelation.Eq);
+
+        // first hit should be 2010 edition due to its price and the above should clause
+        final List<Hit<Void>> hits = response.hits().hits();
+        assertThat(hits.get(0).id()).isEqualTo("book-world-records-2010");
+        assertThat(hits.get(1).id()).isEqualTo("book-world-records-2020");
     }
 }
