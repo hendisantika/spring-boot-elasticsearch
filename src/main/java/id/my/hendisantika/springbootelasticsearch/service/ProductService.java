@@ -60,4 +60,12 @@ public class ProductService {
         final List<Product> products = response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
         return new Page(products, input, searchRequest.from(), searchRequest.size());
     }
+
+    private SearchRequest createSearchRequest(String input, int from, int size) {
+        return new SearchRequest.Builder()
+                .from(from)
+                .size(size)
+                .query(qb -> qb.multiMatch(mmqb -> mmqb.query(input).fields("name", "description")))
+                .build();
+    }
 }
