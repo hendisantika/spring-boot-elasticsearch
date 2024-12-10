@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.HealthStatus;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch.cluster.HealthResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -272,5 +273,36 @@ public class ElasticSearchTests {
         final List<Hit<Void>> hits = response.hits().hits();
         assertThat(hits.get(0).id()).isEqualTo("book-world-records-2010");
         assertThat(hits.get(1).id()).isEqualTo("book-world-records-2020");
+    }
+
+    @Test
+    public void testAggregationBuilder() throws Exception {
+        final List<Product> products = createProducts(100);
+        productService.save(products);
+        client.indices().refresh(b -> b.index(INDEX));
+
+        final SearchResponse<Void> response = client.search(builder -> builder.index(INDEX).size(0)
+                        .aggregations("price_histo", aggBuilder ->
+                                aggBuilder.histogram(histo -> histo.interval(10.0).field("price"))
+                                        .aggregations("stock_average", a -> a.avg(avg -> avg.field("stock_available")))),
+                Void.class);
+
+        assertThat(response.hits().hits()).isEmpty();
+        assertThat(response.aggregations()).hasSize(1);
+        HistogramAggregate histogram = response.aggregations().get("price_histo").histogram();
+        // prices go from 0-120, so we should have 12 buckets on an interval with 10
+        assertThat(histogram.buckets().array()).hasSize(12);
+
+        // also all the average stock should go up
+        final List<Double> averages = histogram.buckets().array().stream()
+                .map(b -> b.aggregations().get("stock_average").avg().value())
+                .toList();
+
+        // check that averages are monotonically increasing due to the data design in createProducts();
+        for (int i = 1; i < averages.size(); i++) {
+            double previousValue = averages.get(i - 1);
+            double currentValue = averages.get(i);
+            assertThat(currentValue).isGreaterThan(previousValue);
+        }
     }
 }
