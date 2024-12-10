@@ -8,19 +8,17 @@ spring:
   datasource:
     url: jdbc:h2:mem:blog;DATABASE_TO_UPPER=false
     driverClassName: org.h2.Driver
-    username: sa
-    password:
+    username: yu7i
+    password: 53cret
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
   h2:
     console:
       enabled: true
   elasticsearch:
-    host: localhost:9200
     uris: http://localhost:9200
     username: elastic
-    password: changeme
+    password: mhsj6S4eCTzb7lvlnISbCrKn
     repositories:
       enabled: true
 
