@@ -3,12 +3,16 @@ package id.my.hendisantika.springbootelasticsearch.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
 import id.my.hendisantika.springbootelasticsearch.util.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,5 +45,19 @@ public class ProductService {
         int from = page.getFrom() + page.getSize();
         final SearchRequest request = createSearchRequest(page.getInput(), from, page.getSize());
         return createPage(request, page.getInput());
+    }
+
+    private Page<Product> createPage(SearchRequest searchRequest, String input) throws IOException {
+        final SearchResponse<Product> response = client.search(searchRequest, Product.class);
+        if (response.hits().total().value() == 0) {
+            return Page.EMPTY;
+        }
+        if (response.hits().hits().isEmpty()) {
+            return Page.EMPTY;
+        }
+
+        response.hits().hits().forEach(hit -> hit.source().setId(hit.id()));
+        final List<Product> products = response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
+        return new Page(products, input, searchRequest.from(), searchRequest.size());
     }
 }
