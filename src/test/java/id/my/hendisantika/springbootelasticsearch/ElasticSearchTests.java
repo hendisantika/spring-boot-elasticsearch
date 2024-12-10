@@ -17,6 +17,7 @@ import org.elasticsearch.client.NodeSelector;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Iterator;
@@ -84,5 +85,10 @@ public class ElasticSearchTests {
     @AfterAll
     public static void closeResources() throws Exception {
         restClient.close();
+    }
+
+    @AfterEach
+    public void deleteProductIndex() throws Exception {
+        client.indices().delete(b -> b.index(INDEX));
     }
 }
