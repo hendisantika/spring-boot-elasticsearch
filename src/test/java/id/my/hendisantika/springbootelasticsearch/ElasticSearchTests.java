@@ -2,9 +2,21 @@ package id.my.hendisantika.springbootelasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.auth.CredentialsProvider;
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.elasticsearch.client.Node;
 import org.elasticsearch.client.NodeSelector;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Iterator;
 
@@ -40,4 +52,31 @@ public class ElasticSearchTests {
     private static RestClient restClient;
     private static ProductServiceImpl productService;
     private static ElasticsearchAsyncClient asyncClient;
+
+    @BeforeAll
+    public static void startElasticsearchCreateLocalClient() throws Exception {
+        container.start();
+
+        HttpHost host = new HttpHost("localhost", container.getMappedPort(9200), "https");
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "s3cret"));
+        final RestClientBuilder builder = RestClient.builder(host);
+
+        builder.setHttpClientConfigCallback(clientBuilder -> {
+            clientBuilder.setSSLContext(container.createSslContextFromCa());
+            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            return clientBuilder;
+        });
+        builder.setNodeSelector(INGEST_NODE_SELECTOR);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        restClient = builder.build();
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(mapper));
+        client = new ElasticsearchClient(transport);
+        asyncClient = new ElasticsearchAsyncClient(transport);
+        productService = new ProductServiceImpl(INDEX, client);
+    }
 }
