@@ -1,6 +1,7 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -72,5 +73,27 @@ public class ProductService {
 
     public void save(Product product) throws IOException {
         save(Collections.singletonList(product));
+    }
+
+    public void save(List<Product> products) throws IOException {
+        final BulkResponse response = client.bulk(builder -> {
+            for (Product product : products) {
+                builder.index(index)
+                        .operations(ob -> {
+                            if (product.getId() != null) {
+                                ob.index(ib -> ib.document(product).id(product.getId()));
+                            } else {
+                                ob.index(ib -> ib.document(product));
+                            }
+                            return ob;
+                        });
+            }
+            return builder;
+        });
+
+        final int size = products.size();
+        for (int i = 0; i < size; i++) {
+            products.get(i).setId(response.items().get(i).id());
+        }
     }
 }
