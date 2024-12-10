@@ -2,6 +2,8 @@ package id.my.hendisantika.springbootelasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.HealthStatus;
+import co.elastic.clients.elasticsearch.cluster.HealthResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -19,8 +21,13 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by IntelliJ IDEA.
@@ -90,5 +97,24 @@ public class ElasticSearchTests {
     @AfterEach
     public void deleteProductIndex() throws Exception {
         client.indices().delete(b -> b.index(INDEX));
+    }
+
+    @Test
+    public void testClusterVersion() throws Exception {
+        // this just exists to index some data, so the index deletion does not fail
+        productService.save(createProducts(1));
+
+        final HealthResponse response = client.cluster().health();
+        // check for yellow or green cluster health
+        assertThat(response.status()).isNotEqualTo(HealthStatus.Red);
+
+        // TODO: add back one async health request request
+        CountDownLatch latch = new CountDownLatch(1);
+        asyncClient.cluster().health()
+                .whenComplete((resp, throwable) -> {
+                    assertThat(resp.status()).isNotEqualTo(HealthStatus.Red);
+                    latch.countDown();
+                });
+        latch.await(10, TimeUnit.SECONDS);
     }
 }
