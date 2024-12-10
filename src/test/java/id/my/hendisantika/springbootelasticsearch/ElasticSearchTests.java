@@ -2,8 +2,12 @@ package id.my.hendisantika.springbootelasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.HealthStatus;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.cluster.HealthResponse;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -179,5 +183,32 @@ public class ElasticSearchTests {
         assertThat(firstPageIds).isNotEqualTo(secondPageIds);
         final Page<Product> thirdPage = productService.next(secondPage);
         assertThat(thirdPage.get()).hasSize(1);
+    }
+
+    @Test
+    public void testSearchAfter() throws Exception {
+        productService.save(createProducts(21));
+        client.indices().refresh(b -> b.index(INDEX));
+
+        final SearchResponse<Void> response = client.search(b -> b
+                        .index(INDEX)
+                        .query(qb -> qb.match(mqb -> mqb.field("name").query(builder -> builder.stringValue("Name"))))
+                        .sort(sb -> sb.field(FieldSort.of(fs -> fs.field("price").order(SortOrder.Desc))))
+                , Void.class);
+
+        final List<String> ids = response.hits().hits().stream().map(Hit::id).collect(Collectors.toList());
+        final List<String> sort = response.hits().hits().get(response.hits().hits().size() - 1).sort();
+
+        // first search after
+        final SearchResponse<Void> searchAfterResponse = client.search(b -> b
+                        .index(INDEX)
+                        .query(qb -> qb.match(mqb -> mqb.field("name").query(builder -> builder.stringValue("Name"))))
+                        .sort(sb -> sb.field(FieldSort.of(fs -> fs.field("price").order(SortOrder.Desc))))
+                        .searchAfter(sort)
+                , Void.class);
+
+        final List<String> searchAfterIds = searchAfterResponse.hits().hits().stream().map(Hit::id).collect(Collectors.toList());
+
+        assertThat(ids).isNotEqualTo(searchAfterIds);
     }
 }
