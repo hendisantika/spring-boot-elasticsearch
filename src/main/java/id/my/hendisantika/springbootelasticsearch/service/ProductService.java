@@ -3,6 +3,7 @@ package id.my.hendisantika.springbootelasticsearch.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.GetResponse;
 import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
+import id.my.hendisantika.springbootelasticsearch.util.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,5 +30,9 @@ public class ProductService {
         Product product = getResponse.source();
         product.setId(id);
         return product;
+    }
+
+    public Page<Product> search(String input) throws IOException {
+        return createPage(createSearchRequest(input, 0, 10), input);
     }
 }
