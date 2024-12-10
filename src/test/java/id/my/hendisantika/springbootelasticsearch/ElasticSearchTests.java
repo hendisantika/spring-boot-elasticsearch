@@ -139,4 +139,16 @@ public class ElasticSearchTests {
         product = productService.findById("0");
         assertThat(product.getId()).isEqualTo("0");
     }
+
+    @Test
+    public void testFindProductById() throws Exception {
+        productService.save(createProducts(3));
+
+        final Product product1 = productService.findById("0");
+        assertThat(product1.getId()).isEqualTo("0");
+        final Product product2 = productService.findById("1");
+        assertThat(product2.getId()).isEqualTo("1");
+        final Product product3 = productService.findById("2");
+        assertThat(product3.getId()).isEqualTo("2");
+    }
 }
