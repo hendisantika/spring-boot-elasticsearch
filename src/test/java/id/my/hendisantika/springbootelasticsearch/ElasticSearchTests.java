@@ -128,4 +128,15 @@ public class ElasticSearchTests {
 
         assertThat(product.getId()).isNotNull();
     }
+
+    @Test
+    public void indexProductWithId() throws Exception {
+        Product product = createProducts(1).get(0);
+        assertThat(product.getId()).isEqualTo("0");
+
+        productService.save(product);
+
+        product = productService.findById("0");
+        assertThat(product.getId()).isEqualTo("0");
+    }
 }
