@@ -24,8 +24,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -160,5 +162,22 @@ public class ElasticSearchTests {
         final Page<Product> page = productService.search("9");
         assertThat(page.get()).hasSize(1);
         assertThat(page.get()).first().extracting("id").isEqualTo("9");
+    }
+
+    @Test
+    public void testPagination() throws Exception {
+        productService.save(createProducts(21));
+        client.indices().refresh(b -> b.index(INDEX));
+
+        // matches all products
+        final Page<Product> page = productService.search("name");
+        assertThat(page.get()).hasSize(10);
+        final Page<Product> secondPage = productService.next(page);
+        assertThat(page.get()).hasSize(10);
+        List<String> firstPageIds = page.get().stream().map(Product::getId).collect(Collectors.toList());
+        List<String> secondPageIds = secondPage.get().stream().map(Product::getId).collect(Collectors.toList());
+        assertThat(firstPageIds).isNotEqualTo(secondPageIds);
+        final Page<Product> thirdPage = productService.next(secondPage);
+        assertThat(thirdPage.get()).hasSize(1);
     }
 }
