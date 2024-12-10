@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,5 +68,9 @@ public class ProductService {
                 .size(size)
                 .query(qb -> qb.multiMatch(mmqb -> mmqb.query(input).fields("name", "description")))
                 .build();
+    }
+
+    public void save(Product product) throws IOException {
+        save(Collections.singletonList(product));
     }
 }
