@@ -151,4 +151,14 @@ public class ElasticSearchTests {
         final Product product3 = productService.findById("2");
         assertThat(product3.getId()).isEqualTo("2");
     }
+
+    @Test
+    public void testSearch() throws Exception {
+        productService.save(createProducts(10));
+        client.indices().refresh(b -> b.index(INDEX));
+
+        final Page<Product> page = productService.search("9");
+        assertThat(page.get()).hasSize(1);
+        assertThat(page.get()).first().extracting("id").isEqualTo("9");
+    }
 }
