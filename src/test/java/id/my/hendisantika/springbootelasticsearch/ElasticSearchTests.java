@@ -117,4 +117,15 @@ public class ElasticSearchTests {
                 });
         latch.await(10, TimeUnit.SECONDS);
     }
+
+    @Test
+    public void indexProductWithoutId() throws Exception {
+        Product product = createProducts(1).get(0);
+        product.setId(null);
+        assertThat(product.getId()).isNull();
+
+        productService.save(product);
+
+        assertThat(product.getId()).isNotNull();
+    }
 }
