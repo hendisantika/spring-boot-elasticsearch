@@ -2,6 +2,7 @@ package id.my.hendisantika.springbootelasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ public class ProductTests {
     @Test
     public void testObjectMapperToProduct() throws Exception {
         final ObjectMapper mapper = new ObjectMapper();
-//        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 //        mapper.setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
