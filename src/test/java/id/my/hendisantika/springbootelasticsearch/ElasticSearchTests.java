@@ -16,6 +16,7 @@ import org.elasticsearch.client.Node;
 import org.elasticsearch.client.NodeSelector;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Iterator;
@@ -78,5 +79,10 @@ public class ElasticSearchTests {
         client = new ElasticsearchClient(transport);
         asyncClient = new ElasticsearchAsyncClient(transport);
         productService = new ProductServiceImpl(INDEX, client);
+    }
+
+    @AfterAll
+    public static void closeResources() throws Exception {
+        restClient.close();
     }
 }
