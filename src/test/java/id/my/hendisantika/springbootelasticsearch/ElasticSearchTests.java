@@ -18,6 +18,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.auth.CredentialsProvider;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
+import id.my.hendisantika.springbootelasticsearch.service.ProductService;
+import id.my.hendisantika.springbootelasticsearch.util.Page;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -69,7 +72,7 @@ public class ElasticSearchTests {
     private static final String INDEX = "my_index";
     private static ElasticsearchClient client;
     private static RestClient restClient;
-    private static ProductServiceImpl productService;
+    private static ProductService productService;
     private static ElasticsearchAsyncClient asyncClient;
 
     @BeforeAll
@@ -96,7 +99,7 @@ public class ElasticSearchTests {
         ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(mapper));
         client = new ElasticsearchClient(transport);
         asyncClient = new ElasticsearchAsyncClient(transport);
-        productService = new ProductServiceImpl(INDEX, client);
+        productService = new ProductService(INDEX, client);
     }
 
     @AfterAll
