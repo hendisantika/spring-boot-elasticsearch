@@ -21,7 +21,9 @@ spring:
     password: mhsj6S4eCTzb7lvlnISbCrKn
     repositories:
       enabled: true
-
+  docker:
+    compose:
+      enabled: true
 springdoc:
   api-docs.path: /v3/api-doc
   swagger-ui.path: /swagger-ui
