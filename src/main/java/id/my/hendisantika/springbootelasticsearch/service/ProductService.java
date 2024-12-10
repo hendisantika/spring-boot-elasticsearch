@@ -1,8 +1,12 @@
 package id.my.hendisantika.springbootelasticsearch.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.GetResponse;
+import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,4 +23,11 @@ import org.springframework.stereotype.Service;
 public class ProductService {
     private final String index;
     private final ElasticsearchClient client;
+
+    public Product findById(String id) throws IOException {
+        final GetResponse<Product> getResponse = client.get(builder -> builder.index(index).id(id), Product.class);
+        Product product = getResponse.source();
+        product.setId(id);
+        return product;
+    }
 }
