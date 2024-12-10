@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -210,5 +211,20 @@ public class ElasticSearchTests {
         final List<String> searchAfterIds = searchAfterResponse.hits().hits().stream().map(Hit::id).collect(Collectors.toList());
 
         assertThat(ids).isNotEqualTo(searchAfterIds);
+    }
+
+    private List<Product> createProducts(int count) {
+        List<Product> products = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            Product product = new Product();
+            product.setId(i + "");
+            product.setName("Name of " + i + " product");
+            product.setDescription("Description of " + i + " product");
+            product.setPrice(i * 1.2);
+            product.setStockAvailable(i * 10);
+            products.add(product);
+        }
+
+        return products;
     }
 }
