@@ -1,5 +1,13 @@
 package id.my.hendisantika.springbootelasticsearch;
 
+import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import org.elasticsearch.client.Node;
+import org.elasticsearch.client.NodeSelector;
+import org.elasticsearch.client.RestClient;
+
+import java.util.Iterator;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-elasticsearch
@@ -16,4 +24,20 @@ public class ElasticSearchTests {
             new ElasticsearchContainer(IMAGE_NAME)
                     .withExposedPorts(9200)
                     .withPassword("53cret");
+
+    private static final NodeSelector INGEST_NODE_SELECTOR = nodes -> {
+        final Iterator<Node> iterator = nodes.iterator();
+        while (iterator.hasNext()) {
+            Node node = iterator.next();
+            // roles may be null if we don't know, thus we keep the node in then...
+            if (node.getRoles() != null && !node.getRoles().isIngest()) {
+                iterator.remove();
+            }
+        }
+    };
+    private static final String INDEX = "my_index";
+    private static ElasticsearchClient client;
+    private static RestClient restClient;
+    private static ProductServiceImpl productService;
+    private static ElasticsearchAsyncClient asyncClient;
 }
