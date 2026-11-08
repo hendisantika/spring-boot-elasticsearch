@@ -8,28 +8,29 @@ import co.elastic.clients.elasticsearch.cluster.HealthResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
+import co.elastic.clients.transport.rest5_client.Rest5ClientTransport;
+import co.elastic.clients.transport.rest5_client.low_level.Node;
+import co.elastic.clients.transport.rest5_client.low_level.NodeSelector;
+import co.elastic.clients.transport.rest5_client.low_level.Rest5Client;
+import co.elastic.clients.transport.rest5_client.low_level.Rest5ClientBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
 import id.my.hendisantika.springbootelasticsearch.service.ProductService;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.elasticsearch.client.Node;
-import org.elasticsearch.client.NodeSelector;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -48,11 +49,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * To change this template use File | Settings | File Templates.
  */
 public class ElasticSearchTests {
-    private static final String IMAGE_NAME = "docker.elastic.co/elasticsearch/elasticsearch:8.16.1";
+    private static final String IMAGE_NAME = "docker.elastic.co/elasticsearch/elasticsearch:9.5.6";
+    private static final String PASSWORD = "s3cret";
     private static final ElasticsearchContainer container =
             new ElasticsearchContainer(IMAGE_NAME)
                     .withExposedPorts(9200)
-                    .withPassword("53cret");
+                    .withPassword(PASSWORD);
 
     private static final NodeSelector INGEST_NODE_SELECTOR = nodes -> {
         final Iterator<Node> iterator = nodes.iterator();
@@ -66,7 +68,7 @@ public class ElasticSearchTests {
     };
     private static final String INDEX = "my_index";
     private static ElasticsearchClient client;
-    private static RestClient restClient;
+    private static Rest5Client restClient;
     private static ProductService productService;
     private static ElasticsearchAsyncClient asyncClient;
 
@@ -74,24 +76,20 @@ public class ElasticSearchTests {
     public static void startElasticsearchCreateLocalClient() throws Exception {
         container.start();
 
-        HttpHost host = new HttpHost("localhost", container.getMappedPort(9200), "https");
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "s3cret"));
-        final RestClientBuilder builder = RestClient.builder(host);
-
-        builder.setHttpClientConfigCallback(clientBuilder -> {
-            clientBuilder.setSSLContext(container.createSslContextFromCa());
-            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            return clientBuilder;
-        });
-        builder.setNodeSelector(INGEST_NODE_SELECTOR);
+        HttpHost host = new HttpHost("https", container.getHost(), container.getMappedPort(9200));
+        final String basicAuth = Base64.getEncoder()
+                .encodeToString(("elastic:" + PASSWORD).getBytes(StandardCharsets.UTF_8));
+        final Rest5ClientBuilder builder = Rest5Client.builder(host)
+                .setSSLContext(container.createSslContextFromCa())
+                .setDefaultHeaders(new Header[]{new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + basicAuth)})
+                .setNodeSelector(INGEST_NODE_SELECTOR);
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         restClient = builder.build();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(mapper));
+        ElasticsearchTransport transport = new Rest5ClientTransport(restClient, new JacksonJsonpMapper(mapper));
         client = new ElasticsearchClient(transport);
         asyncClient = new ElasticsearchAsyncClient(transport);
         productService = new ProductService(INDEX, client);

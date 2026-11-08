@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import id.my.hendisantika.springbootelasticsearch.model.dto.Product;
 import id.my.hendisantika.springbootelasticsearch.util.Page;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,10 +27,15 @@ import java.util.stream.Collectors;
  * To change this template use File | Settings | File Templates.
  */
 @Service
-@RequiredArgsConstructor
 public class ProductService {
     private final String index;
     private final ElasticsearchClient client;
+
+    public ProductService(@Value("${app.elasticsearch.product-index:products}") String index,
+                          ElasticsearchClient client) {
+        this.index = index;
+        this.client = client;
+    }
 
     public Product findById(String id) throws IOException {
         final GetResponse<Product> getResponse = client.get(builder -> builder.index(index).id(id), Product.class);
